@@ -1,0 +1,4 @@
+telnet 127.0.0.1 6000
+{"msgid":1}
+{"msgid":2}
+{"msgid":4}  
