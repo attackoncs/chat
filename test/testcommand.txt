@@ -25,4 +25,8 @@ telnet 127.0.0.1 6000
 //1给3发送
 {"msgid":6,"id":3,"from":"liaoyl","to":1,"msg":"I love you"}
 {"msgid":6,"id":1,"from":"wangxinlin","to":3,"msg":"I love you too"}
-
+6测试离线发送消息
+登录并发给另一个未登录的消息
+{"msgid":1,"id":1,"password":"123456"}
+{"msgid":6,"id":1,"from":"wangxinlin","to":3,"msg":"I love you too"}
+{"msgid":1,"id":3,"password":"666666"}
