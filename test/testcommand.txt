@@ -1,4 +1,7 @@
+1测试登录和注册的回调是否被调用
 telnet 127.0.0.1 6000
 {"msgid":1}
 {"msgid":2}
 {"msgid":4}  
+2测试注册是否成功写入数据库
+{"msgid":4,"name":"wangxinlin","password":"123456"}
