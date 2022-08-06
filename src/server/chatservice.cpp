@@ -42,7 +42,39 @@ MsgHandler ChatService::getHandler(int msgid)
 // 处理登录业务  id  pwd   pwd
 void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
 {
-    LOG_INFO << "do login service!!!";
+    int id = js["id"].get<int>();
+    string pwd = js["password"];
+
+    User user = _userModel.query(id);
+    json response;
+    if(user.getId() == id &&user.getPwd() == pwd){
+        if(user.getState()=="online"){
+            response["msgid"] = LOGIN_MSG_ACK;
+            response["errno"] = 2;
+            response["errmsg"] = "该账号已经登录，请重新输入新账号";
+        }else{
+
+            //登录成功，记录用户连接信息
+            {
+                lock_guard<mutex> lock(_connMutex);
+                _userConnMap.insert({id,conn});
+            }
+            //登录成功，更新用户状态信息
+            user.setState("online");
+            _userModel.updateState(user);
+
+            response["msgid"] = LOGIN_MSG_ACK;
+            response["errno"] = 0;
+            response["id"] = user.getId();
+            response["name"] = user.getName();
+        }
+    }else{
+        // 该用户不存在、用户存在但是密码错误，登录失败
+        response["msgid"] = LOGIN_MSG_ACK;
+        response["errno"] = 1;
+        response["errmsg"] = "id or password is invalid!";
+    }
+    conn->send(response.dump());
 }
 
 // 处理注册业务  name  password
@@ -55,23 +87,21 @@ void ChatService::reg(const TcpConnectionPtr &conn, json &js, Timestamp time)
     user.setName(name);
     user.setPwd(pwd);
     bool state = _userModel.insert(user);
+    json response;
     if (state)
     {
         // 注册成功
-        json response;
         response["msgid"] = REG_MSG_ACK;
         response["errno"] = 0;
         response["id"] = user.getId();
-        conn->send(response.dump());
     }
     else
     {
         // 注册失败
-        json response;
         response["msgid"] = REG_MSG_ACK;
         response["errno"] = 1;
-        conn->send(response.dump());
     }
+    conn->send(response.dump());
 }
 
 // 处理客户端异常退出

@@ -46,7 +46,7 @@ User UserModel::query(int id)
                 user.setName(row[1]);
                 user.setPwd(row[2]);
                 user.setState(row[3]);
-                mysql_free_result(res);
+                mysql_free_result(res);//释放资源，否则内存泄漏
                 return user;
             }
         }
