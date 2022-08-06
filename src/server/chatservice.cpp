@@ -107,5 +107,25 @@ void ChatService::reg(const TcpConnectionPtr &conn, json &js, Timestamp time)
 // 处理客户端异常退出
 void ChatService::clientCloseException(const TcpConnectionPtr &conn)
 {
-    LOG_INFO << "clientCloseException";
+    //查找并删除conn，将该用户状态改为offline
+    //但要保证线程安全，因为退出时，其他用户写入需保证线程安全
+    User user;
+    {
+        lock_guard<mutex> lock(_connMutex);
+        for(auto it=_userConnMap.begin(); it!=_userConnMap.end();++it){
+            if(it->second == conn){
+                //从map表中删除用户的连接信息
+                user.setId(it->first);
+                _userConnMap.erase(it);
+                break;
+            }
+        }
+    }
+    
+    //更新用户状态信息
+    if(user.getId() != -1){
+        user.setState("offline");
+        _userModel.updateState(user);
+    }
+    
 }
