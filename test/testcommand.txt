@@ -30,3 +30,6 @@ telnet 127.0.0.1 6000
 {"msgid":1,"id":1,"password":"123456"}
 {"msgid":6,"id":1,"from":"wangxinlin","to":3,"msg":"I love you too"}
 {"msgid":1,"id":3,"password":"666666"}
+7测试服务器异常退出时，将online改为离线状态
+{"msgid":1,"id":1,"password":"123456"}
+服务器按ctrl+c
