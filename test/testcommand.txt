@@ -33,3 +33,9 @@ telnet 127.0.0.1 6000
 7测试服务器异常退出时，将online改为离线状态
 {"msgid":1,"id":1,"password":"123456"}
 服务器按ctrl+c
+8添加好友
+//注册信用户并添加好友
+{"msgid":4,"name":"wxl","password":"123456"}
+{"msgid":7,"userid":1,"friendid":4}
+//登录看是否正常打印好友列表
+{"msgid":1,"id":1,"password":"123456"}
