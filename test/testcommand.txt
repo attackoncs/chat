@@ -40,3 +40,7 @@ telnet 127.0.0.1 6000
 //登录看是否正常打印好友列表
 {"msgid":1,"id":1,"password":"123456"}
 9群组业务未测试，直接构建json比较麻烦，后续开发完客户端在测试
+10服务负载均衡
+编译使支持tcp的负载均衡并启动nginx，启动两台配置在nginx中的服务器，并启动多个客户端，客户端向nginx服务器的ip和配置的端口发请求，再看服务器请求响应是否达到负载均衡效果
+11跨服务器通信
+安装redis-server、redis-cli及hredis，同10，启动nginx中的配置的服务器，并启动多个客户端，向nginx服务器的ip和端口发请求，各客户端登录后，使用chat和groupchat分别发送聊天命令，可以看到连接上的服务器中打印connect redis-server success并且聊天可正常运行
