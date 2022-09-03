@@ -1,6 +1,6 @@
 #include "chatservice.hpp"
 #include "public.hpp"
-#include <muduo/base/Logging.h>
+#include "log.hpp"
 #include <vector>
 using namespace std;
 using namespace muduo;
@@ -49,7 +49,7 @@ MsgHandler ChatService::getHandler(int msgid)
     {
         // 返回一个默认的处理器，空操作，需要处理错误的情况，这里默认空处理器，“=”获取lambda外部变量
         return [=](const TcpConnectionPtr &conn, json &js, Timestamp) {
-            LOG_ERROR << "msgid:" << msgid << " can not find handler!";
+            spdlog->error("msgid:{} can not find handler!",to_string(msgid));
         };
     }
     else

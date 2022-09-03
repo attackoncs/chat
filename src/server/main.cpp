@@ -2,6 +2,7 @@
 #include "chatservice.hpp"
 #include <iostream>
 #include <signal.h>
+#include "log.hpp"
 using namespace std;
 
 // 处理服务器ctrl+c结束后，重置user的状态信息
@@ -16,7 +17,7 @@ int main(int argc, char **argv)
 {
     if (argc < 3)
     {
-        cerr << "command invalid! example: ./ChatServer 127.0.0.1 6000" << endl;
+        spdlog->error("command invalid! example: ./ChatServer 127.0.0.1 6000");
         exit(-1);
     }
 

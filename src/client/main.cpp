@@ -21,6 +21,7 @@ using json = nlohmann::json;
 #include "group.hpp"
 #include "user.hpp"
 #include "public.hpp"
+#include "log.hpp"
 
 // 记录当前系统登录的用户信息
 User g_currentUser;
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
 {
     if (argc < 3)
     {
-        cerr << "command invalid! example: ./ChatClient 127.0.0.1 6000" << endl;
+        spdlog->error("command invalid! example: ./ChatClient 127.0.0.1 6000");
         exit(-1);
     }
 
@@ -64,7 +65,7 @@ int main(int argc, char **argv)
     int clientfd = socket(AF_INET, SOCK_STREAM, 0);
     if (-1 == clientfd)
     {
-        cerr << "socket create error" << endl;
+        spdlog->error("socket create error");
         exit(-1);
     }
 
@@ -79,7 +80,7 @@ int main(int argc, char **argv)
     // client和server进行连接
     if (-1 == connect(clientfd, (sockaddr *)&server, sizeof(sockaddr_in)))
     {
-        cerr << "connect server error" << endl;
+        spdlog->error("connect server error!");
         close(clientfd);
         exit(-1);
     }
@@ -128,7 +129,7 @@ int main(int argc, char **argv)
             int len = send(clientfd, request.c_str(), strlen(request.c_str()) + 1, 0);
             if (len == -1)
             {
-                cerr << "send login msg error:" << request << endl;
+                spdlog->error("send login msg error::{}",request);
             }
 
             sem_wait(&rwsem); // 等待信号量，由子线程处理完登录的响应消息后，通知这里
@@ -159,7 +160,7 @@ int main(int argc, char **argv)
             int len = send(clientfd, request.c_str(), strlen(request.c_str()) + 1, 0);
             if (len == -1)
             {
-                cerr << "send reg msg error:" << request << endl;
+                spdlog->error("send reg msg error:{}",request);
             }
             
             sem_wait(&rwsem); // 等待信号量，子线程处理完注册消息会通知
@@ -170,7 +171,7 @@ int main(int argc, char **argv)
             sem_destroy(&rwsem);
             exit(0);
         default:
-            cerr << "invalid input!" << endl;
+            spdlog->error("invalid input");
             break;
         }
     }
@@ -183,12 +184,11 @@ void doRegResponse(json &responsejs)
 {
     if (0 != responsejs["errno"].get<int>()) // 注册失败
     {
-        cerr << "name is already exist, register error!" << endl;
+        spdlog->error("name is already exist, register error!");
     }
     else // 注册成功
     {
-        cout << "name register success, userid is " << responsejs["id"]
-                << ", do not forget it!" << endl;
+        spdlog->info("name register success, userid is {}, do not forget it!",to_string(responsejs["id"])); 
     }
 }
 
@@ -197,7 +197,7 @@ void doLoginResponse(json &responsejs)
 {
     if (0 != responsejs["errno"].get<int>()) // 登录失败
     {
-        cerr << responsejs["errmsg"] << endl;
+        spdlog->error("{}",responsejs["errmsg"]);
         g_isLoginSuccess = false;
     }
     else // 登录成功
@@ -416,7 +416,7 @@ void mainMenu(int clientfd)
         auto it = commandHandlerMap.find(command);
         if (it == commandHandlerMap.end())
         {
-            cerr << "invalid input command!" << endl;
+            spdlog->error("invalid input command!");
             continue;
         }
 
@@ -448,7 +448,7 @@ void addfriend(int clientfd, string str)
     int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
     if (-1 == len)
     {
-        cerr << "send addfriend msg error -> " << buffer << endl;
+        spdlog->error("send addfriend msg error -> {}", buffer);
     }
 }
 // "chat" command handler
@@ -457,7 +457,7 @@ void chat(int clientfd, string str)
     int idx = str.find(":"); // friendid:message
     if (-1 == idx)
     {
-        cerr << "chat command invalid!" << endl;
+        spdlog->error("chat command invalid!");
         return;
     }
 
@@ -476,7 +476,7 @@ void chat(int clientfd, string str)
     int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
     if (-1 == len)
     {
-        cerr << "send chat msg error -> " << buffer << endl;
+        spdlog->error("send chat msg error -> {}",buffer);
     }
 }
 // "creategroup" command handler  groupname:groupdesc
@@ -485,7 +485,7 @@ void creategroup(int clientfd, string str)
     int idx = str.find(":");
     if (-1 == idx)
     {
-        cerr << "creategroup command invalid!" << endl;
+        spdlog->error("creategroup command invalid!");
         return;
     }
 
@@ -502,7 +502,7 @@ void creategroup(int clientfd, string str)
     int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
     if (-1 == len)
     {
-        cerr << "send creategroup msg error -> " << buffer << endl;
+        spdlog->error("send creategroup msg error -> {}",buffer);
     }
 }
 // "addgroup" command handler
@@ -518,7 +518,7 @@ void addgroup(int clientfd, string str)
     int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
     if (-1 == len)
     {
-        cerr << "send addgroup msg error -> " << buffer << endl;
+        spdlog->error("send addgroup msg error -> {}", buffer);
     }
 }
 // "groupchat" command handler   groupid:message
@@ -527,7 +527,7 @@ void groupchat(int clientfd, string str)
     int idx = str.find(":");
     if (-1 == idx)
     {
-        cerr << "groupchat command invalid!" << endl;
+        spdlog->error("groupchat command invalid!");
         return;
     }
 
@@ -546,7 +546,7 @@ void groupchat(int clientfd, string str)
     int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
     if (-1 == len)
     {
-        cerr << "send groupchat msg error -> " << buffer << endl;
+        spdlog->error("send groupchat msg error -> {}",buffer);
     }
 }
 // "loginout" command handler
@@ -560,7 +560,7 @@ void loginout(int clientfd, string)
     int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
     if (-1 == len)
     {
-        cerr << "send loginout msg error -> " << buffer << endl;
+        spdlog->error("send loginout msg error -> {}", buffer);
     }
     else
     {

@@ -1,7 +1,7 @@
 #include "chatserver.hpp"
 #include "json.hpp"
 #include "chatservice.hpp"
-
+#include "log.hpp"
 #include <iostream>
 #include <functional>
 #include <string>
@@ -50,8 +50,7 @@ void ChatServer::onMessage(const TcpConnectionPtr &conn,
     string buf = buffer->retrieveAllAsString();
 
     // 测试，添加json打印代码
-    cout << buf << endl;
-
+    spdlog->info("Received {}",buf);
     // 数据的反序列化
     json js = json::parse(buf);
     // 达到的目的：完全解耦网络模块的代码和业务模块的代码
